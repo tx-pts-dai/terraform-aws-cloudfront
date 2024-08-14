@@ -24,14 +24,11 @@ module "cdn" {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = "default"
-    query_string     = true
-    cookies_whitelisted_names = [
-      "MyApp-Cookie",
-    ]
-    headers = [
-      "Authorization",
-      "Host",
-    ]
+    cache_policy = {
+        headers         = ["Authorization", "Host"]
+        cookie_behavior = "whitelist"
+        cookies         = ["my-custom-cookie"]
+    }
   }
   dynamic_ordered_cache_behavior = var.cloudfront_ordered_cache_behaviour # Same as the default one, but ordered
 }
