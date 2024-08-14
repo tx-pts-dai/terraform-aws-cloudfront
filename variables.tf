@@ -106,7 +106,7 @@ variable "cloudfront_custom_error_response" {
 }
 
 variable "viewer_cert_minimum_protocol_version" {
-  description = "Minimum SSL/TLS protocol for https certifictes used by the viewer"
+  description = "Minimum SSL/TLS protocol for https certificates used by the viewer"
   type        = string
   default     = "TLSv1.2_2021"
 }
