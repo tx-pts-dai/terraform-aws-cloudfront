@@ -109,16 +109,18 @@ Generated with `terraform-docs markdown --anchor=false --html=false --indent=3 -
 
 | Name | Version |
 |------|---------|
-| terraform | >= 1.0.4 |
-| aws | >= 4.0 |
+| terraform | >= 1.3.0 |
+| aws | >= 5.0 |
 | cloudflare | >= 3.0 |
+| random | >= 3.0 |
 
 ### Providers
 
 | Name | Version |
 |------|---------|
-| aws | >= 4.0 |
-| cloudflare | >= 3.0 |
+| aws | 5.62.0 |
+| cloudflare | 4.39.0 |
+| random | 3.6.2 |
 
 ### Modules
 
@@ -154,6 +156,7 @@ No modules.
 | [aws_s3_bucket_lifecycle_configuration.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration) | resource |
 | [aws_s3_bucket_ownership_controls.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_ownership_controls) | resource |
 | [cloudflare_record.certificate_validation](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/record) | resource |
+| [random_id.this](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.cloudfront_realtime_assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cloudfront_realtime_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -169,10 +172,10 @@ No modules.
 | cloudfront\_custom\_error\_response | The list of custom errors and their TTLs. | ```list(object({ error_code = number min_ttl = number response_page_path = string response_code = number }))``` | `[]` | no |
 | cloudfront\_price\_class | Price class of the cloudfront distribution. | `string` | `"PriceClass_100"` | no |
 | comment | Comments for the cloudfront distribution. | `string` | `""` | no |
-| default\_cache\_behavior | Default cache behavior resource for this distribution. | ```object({ path_pattern = string allowed_methods = list(string) cached_methods = list(string) target_origin_id = string compress = optional(bool, true) cache_policy = optional(object({ min_ttl = optional(number, 0) default_ttl = optional(number, 0) max_ttl = optional(number, 31536000) # 1 year header_behavior = optional(string, "whitelist") headers = optional(list(string), ["Host", "Origin"]) cookie_behavior = optional(string, "none") cookies = optional(list(string), []) query_string_behavior = optional(string, "all") query_strings = optional(list(string), []) enable_brotli = optional(bool, true) enable_gzip = optional(bool, true) }), {}) # use this if you want to include additional headers/cookies/query_strings to be forwarded to the origin origin_request_policy = optional(object({ header_behavior = optional(string) headers = optional(list(string), []) cookie_behavior = optional(string) cookies = optional(list(string), []) query_string_behavior = optional(string) query_strings = optional(list(string), []) })) viewer_protocol_policy = optional(string, "redirect-to-https") realtime_log_config_arn = optional(string) function_association = optional(list(object({ event_type = string function_arn = string })), []) lambda_at_edge = optional(list(object({ lambda_arn = string event_type = string include_body = bool })), []) })``` | `null` | no |
-| default\_root\_object | The object that we want CLoudfront to return | `string` | n/a | yes |
+| default\_cache\_behavior | Default cache behavior resource for this distribution. | ```object({ path_pattern = string allowed_methods = list(string) cached_methods = list(string) target_origin_id = string compress = optional(bool, true) cache_policy = optional(object({ min_ttl = optional(number, 0) default_ttl = optional(number, 0) max_ttl = optional(number, 31536000) # 1 year header_behavior = optional(string, "whitelist") headers = optional(list(string), ["Host", "Origin"]) cookie_behavior = optional(string, "none") cookies = optional(list(string), []) query_string_behavior = optional(string, "all") query_strings = optional(list(string), []) enable_brotli = optional(bool, true) enable_gzip = optional(bool, true) }), {}) # use this if you want to include additional headers/cookies/query_strings to be forwarded to the origin origin_request_policy = optional(object({ header_behavior = optional(string, "none") headers = optional(list(string), []) cookie_behavior = optional(string, "none") cookies = optional(list(string), []) query_string_behavior = optional(string, "none") query_strings = optional(list(string), []) })) viewer_protocol_policy = optional(string, "redirect-to-https") realtime_log_config_arn = optional(string) function_association = optional(list(object({ event_type = string function_arn = string })), []) lambda_at_edge = optional(list(object({ lambda_arn = string event_type = string include_body = bool })), []) })``` | `null` | no |
+| default\_root\_object | The object that we want Cloudfront to return | `string` | `null` | no |
 | dynamic\_custom\_origin\_config | Configuration of the custom origin (e.g: HTTP server) | ```list(object({ domain_name = string origin_id = string origin_path = string http_port = optional(number, 80) https_port = optional(number, 443) origin_keepalive_timeout = optional(number, 60) origin_read_timeout = optional(number, 60) origin_protocol_policy = optional(string, "https-only") origin_ssl_protocols = list(string) custom_header = optional(list(object({ name = string value = string })), []) }))``` | `[]` | no |
-| dynamic\_ordered\_cache\_behavior | An ordered list of cache behaviors resource for this distribution. List from top to bottom in order of precedence. The topmost cache behavior will have precedence 0. | ```list(object({ path_pattern = string allowed_methods = list(string) cached_methods = list(string) target_origin_id = string compress = optional(bool, true) cache_policy = optional(object({ min_ttl = optional(number, 0) default_ttl = optional(number, 0) max_ttl = optional(number, 31536000) # 1 year header_behavior = optional(string, "whitelist") headers = optional(list(string), ["Host", "Origin"]) cookie_behavior = optional(string, "none") cookies = optional(list(string), []) query_string_behavior = optional(string, "all") query_strings = optional(list(string), []) enable_brotli = optional(bool, true) enable_gzip = optional(bool, true) }), {}) # use this if you want to include additional headers/cookies/query_strings to be forwarded to the origin origin_request_policy = optional(object({ header_behavior = optional(string) headers = optional(list(string), []) cookie_behavior = optional(string) cookies = optional(list(string), []) query_string_behavior = optional(string) query_strings = optional(list(string), []) })) viewer_protocol_policy = optional(string, "redirect-to-https") realtime_log_config_arn = optional(string) function_association = optional(list(object({ event_type = string function_arn = string })), []) lambda_at_edge = optional(list(object({ lambda_arn = string event_type = string include_body = bool })), []) }))``` | `[]` | no |
+| dynamic\_ordered\_cache\_behavior | An ordered list of cache behaviors resource for this distribution. List from top to bottom in order of precedence. The topmost cache behavior will have precedence 0. | ```list(object({ path_pattern = string allowed_methods = list(string) cached_methods = list(string) target_origin_id = string compress = optional(bool, true) cache_policy = optional(object({ min_ttl = optional(number, 0) default_ttl = optional(number, 0) max_ttl = optional(number, 31536000) # 1 year header_behavior = optional(string, "whitelist") headers = optional(list(string), ["Host", "Origin"]) cookie_behavior = optional(string, "none") cookies = optional(list(string), []) query_string_behavior = optional(string, "all") query_strings = optional(list(string), []) enable_brotli = optional(bool, true) enable_gzip = optional(bool, true) }), {}) # use this if you want to include additional headers/cookies/query_strings to be forwarded to the origin origin_request_policy = optional(object({ header_behavior = optional(string, "none") headers = optional(list(string), []) cookie_behavior = optional(string, "none") cookies = optional(list(string), []) query_string_behavior = optional(string, "none") query_strings = optional(list(string), []) })) viewer_protocol_policy = optional(string, "redirect-to-https") realtime_log_config_arn = optional(string) function_association = optional(list(object({ event_type = string function_arn = string })), []) lambda_at_edge = optional(list(object({ lambda_arn = string event_type = string include_body = bool })), []) }))``` | `[]` | no |
 | dynamic\_origin\_group | One or more origin\_group for this distribution (multiples allowed). | ```list(object({ id = string status_codes = list(number) member1 = string member2 = string }))``` | `[]` | no |
 | dynamic\_s3\_origin\_config | Configuration of the S3 bucket used as origin, if any | ```list(object({ domain_name = string origin_id = string origin_path = string origin_access_identity = optional(string) }))``` | `[]` | no |
 | enable\_cloudfront | Enables the cloudfront distribution. If false: distribution isn't active. | `bool` | `true` | no |
@@ -189,4 +192,5 @@ No modules.
 |------|-------------|
 | cloudfront\_distribution\_dns\_name | DNS name of the cloudfront distribution |
 | cloudfront\_distribution\_hosted\_zone | Hosted zone id of the cloudfront distribution |
+| realtime\_log\_config\_arn | ARN of the realtime logging configuration |
 <!-- END_TF_DOCS -->
