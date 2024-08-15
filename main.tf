@@ -7,7 +7,7 @@ terraform {
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = ">= 3.0"
+      version = ">= 4.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -54,7 +54,7 @@ resource "cloudflare_record" "certificate_validation" {
 
   allow_overwrite = true
   name            = each.value.name
-  value           = each.value.record
+  content         = each.value.record
   ttl             = 60
   type            = each.value.type
   zone_id         = var.cloudflare_zone_id
