@@ -7,7 +7,7 @@ This module provides a CloudFront distribution, with SSL certificates from Custo
 ```tf
 module "cdn" {
   source            = "tx-pts-dai/cloudfront/aws"
-  version           = "2.0.1"
+  version           = "2.0.0"
   enable_cloudfront = true
   aliases           = ["www.example.com", "beta.example.com", "*.beta.example.com"]
   http_version      = var.cloudfront_http_version
