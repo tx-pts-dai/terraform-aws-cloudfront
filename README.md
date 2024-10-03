@@ -32,6 +32,10 @@ module "cdn" {
     }
   }
   dynamic_ordered_cache_behavior = var.cloudfront_ordered_cache_behaviour # Same as the default one, but ordered
+
+  providers = {
+    aws = aws.us # AWS provider should be in region "us-east-1"
+  }
 }
 ```
 
