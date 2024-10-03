@@ -6,7 +6,8 @@ This module provides a CloudFront distribution, with SSL certificates from Custo
 
 ```tf
 module "cdn" {
-  source            = "github.com/DND-IT/infra-terraform-module.git//cloudfront?ref=cloudfront-v5.2.2"
+  source            = "tx-pts-dai/cloudfront/aws"
+  version           = "2.0.0"
   enable_cloudfront = true
   aliases           = ["www.example.com", "beta.example.com", "*.beta.example.com"]
   http_version      = var.cloudfront_http_version
@@ -31,6 +32,10 @@ module "cdn" {
     }
   }
   dynamic_ordered_cache_behavior = var.cloudfront_ordered_cache_behaviour # Same as the default one, but ordered
+
+  providers = {
+    aws = aws.us # AWS provider should be in region "us-east-1"
+  }
 }
 ```
 
