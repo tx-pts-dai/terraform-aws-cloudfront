@@ -27,6 +27,18 @@ variable "enable_cloudfront" {
   default     = true
 }
 
+variable "enable_cloudfront_staging" {
+  description = "Enables the cloudfront staging distribution and continuous deployment. If false: staging distribution isn't active."
+  type        = bool
+  default     = false
+}
+
+variable "cloudfront_staging_weight" {
+  description = "The weight of the staging distribution. Default: 0. If set to x, x% of traffic will go to the staging distribution."
+  type        = number
+  default     = 0
+}
+
 variable "cloudfront_price_class" {
   description = "Price class of the cloudfront distribution."
   type        = string

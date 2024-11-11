@@ -149,11 +149,172 @@ resource "aws_cloudfront_origin_request_policy" "ordered_behaviors" {
   }
 }
 
+
 resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   aliases             = var.aliases
   comment             = "${var.comment}. Associated with resource ID ${random_id.this.hex}"
   default_root_object = var.default_root_object
   enabled             = var.enable_cloudfront
+  http_version        = var.http_version
+  is_ipv6_enabled     = "true"
+  price_class         = var.cloudfront_price_class
+  retain_on_delete    = var.retain_on_delete
+  wait_for_deployment = var.wait_for_deployment
+  web_acl_id          = var.web_acl_id
+
+  # NOTE: A continuous deployment policy cannot be associated to distribution
+  # on creation. Set this argument once the resource exists.
+  continuous_deployment_policy_id = var.enable_cloudfront_staging ? aws_cloudfront_continuous_deployment_policy.cloudfront_staging[0].id : null
+
+  dynamic "origin" {
+    for_each = var.dynamic_s3_origin_config
+    content {
+      domain_name = origin.value.domain_name
+      origin_id   = origin.value.origin_id
+      origin_path = origin.value.origin_path
+      dynamic "s3_origin_config" {
+        for_each = origin.value.origin_access_identity != null ? [1] : []
+        content {
+          origin_access_identity = origin.value.origin_access_identity
+        }
+      }
+    }
+  }
+  dynamic "origin" {
+    for_each = var.dynamic_custom_origin_config
+    content {
+      domain_name = origin.value.domain_name
+      origin_id   = origin.value.origin_id
+      origin_path = origin.value.origin_path
+      custom_origin_config {
+        http_port                = origin.value.http_port
+        https_port               = origin.value.https_port
+        origin_keepalive_timeout = origin.value.origin_keepalive_timeout
+        origin_read_timeout      = origin.value.origin_read_timeout
+        origin_protocol_policy   = origin.value.origin_protocol_policy
+        origin_ssl_protocols     = origin.value.origin_ssl_protocols
+      }
+      dynamic "custom_header" {
+        for_each = origin.value.custom_header
+        content {
+          name  = custom_header.value.name
+          value = custom_header.value.value
+        }
+      }
+    }
+  }
+  dynamic "origin_group" {
+    for_each = var.dynamic_origin_group
+    content {
+      origin_id = origin_group.value.id
+      failover_criteria {
+        status_codes = origin_group.value.status_codes
+      }
+      member {
+        origin_id = origin_group.value.member1
+      }
+      member {
+        origin_id = origin_group.value.member2
+      }
+    }
+  }
+  default_cache_behavior {
+    allowed_methods         = var.default_cache_behavior.allowed_methods
+    cached_methods          = var.default_cache_behavior.cached_methods
+    target_origin_id        = var.default_cache_behavior.target_origin_id
+    compress                = var.default_cache_behavior.compress
+    viewer_protocol_policy  = var.default_cache_behavior.viewer_protocol_policy
+    realtime_log_config_arn = var.default_cache_behavior.realtime_log_config_arn
+
+    cache_policy_id          = aws_cloudfront_cache_policy.ordered_behaviors["default"].id
+    origin_request_policy_id = try(aws_cloudfront_origin_request_policy.ordered_behaviors["default"].id, null)
+
+    dynamic "function_association" {
+      for_each = var.default_cache_behavior.function_association
+      content {
+        function_arn = function_association.value.function_arn
+        event_type   = function_association.value.event_type
+      }
+    }
+
+    dynamic "lambda_function_association" {
+      for_each = var.default_cache_behavior.lambda_at_edge
+      content {
+        lambda_arn   = lambda_function_association.value.lambda_arn
+        event_type   = lambda_function_association.value.event_type
+        include_body = lambda_function_association.value.include_body
+      }
+    }
+  }
+
+  dynamic "ordered_cache_behavior" {
+    for_each = var.dynamic_ordered_cache_behavior
+    content {
+      path_pattern            = ordered_cache_behavior.value.path_pattern
+      allowed_methods         = ordered_cache_behavior.value.allowed_methods
+      cached_methods          = ordered_cache_behavior.value.cached_methods
+      target_origin_id        = ordered_cache_behavior.value.target_origin_id
+      compress                = ordered_cache_behavior.value.compress
+      viewer_protocol_policy  = ordered_cache_behavior.value.viewer_protocol_policy
+      realtime_log_config_arn = ordered_cache_behavior.value.realtime_log_config_arn
+
+      cache_policy_id          = aws_cloudfront_cache_policy.ordered_behaviors[substr(sha256(ordered_cache_behavior.value.path_pattern), 0, 8)].id
+      origin_request_policy_id = try(aws_cloudfront_origin_request_policy.ordered_behaviors[substr(sha256(ordered_cache_behavior.value.path_pattern), 0, 8)].id, null)
+
+      dynamic "function_association" {
+        for_each = ordered_cache_behavior.value.function_association
+        content {
+          function_arn = function_association.value.function_arn
+          event_type   = function_association.value.event_type
+        }
+      }
+
+      dynamic "lambda_function_association" {
+        for_each = ordered_cache_behavior.value.lambda_at_edge
+        content {
+          lambda_arn   = lambda_function_association.value.lambda_arn
+          event_type   = lambda_function_association.value.event_type
+          include_body = lambda_function_association.value.include_body
+        }
+      }
+    }
+  }
+  viewer_certificate {
+    acm_certificate_arn      = aws_acm_certificate_validation.cert.certificate_arn
+    minimum_protocol_version = var.viewer_cert_minimum_protocol_version
+    ssl_support_method       = "sni-only"
+  }
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  dynamic "custom_error_response" {
+    for_each = var.cloudfront_custom_error_response
+    content {
+      error_code            = custom_error_response.value.error_code
+      error_caching_min_ttl = custom_error_response.value.min_ttl
+      response_page_path    = custom_error_response.value.response_page_path
+      response_code         = custom_error_response.value.response_code
+    }
+  }
+
+  dynamic "logging_config" {
+    for_each = var.logging.activate ? [1] : []
+    content {
+      bucket = var.logging.bucket_override != null ? var.logging.bucket_override : aws_s3_bucket.logs[0].bucket_domain_name
+      prefix = var.logging.logs_prefix
+    }
+  }
+}
+
+resource "aws_cloudfront_distribution" "cloudfront_staging_distribution" {
+  count               = var.enable_cloudfront_staging ? 1 : 0
+  aliases             = var.aliases
+  comment             = "${var.comment}. Associated with resource ID ${random_id.this.hex}"
+  default_root_object = var.default_root_object
+  enabled             = var.enable_cloudfront_staging
   http_version        = var.http_version
   is_ipv6_enabled     = "true"
   price_class         = var.cloudfront_price_class
@@ -300,6 +461,23 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     content {
       bucket = var.logging.bucket_override != null ? var.logging.bucket_override : aws_s3_bucket.logs[0].bucket_domain_name
       prefix = var.logging.logs_prefix
+    }
+  }
+}
+
+resource "aws_cloudfront_continuous_deployment_policy" "cloudfront_staging" {
+  count   = var.enable_cloudfront_staging ? 1 : 0
+  enabled = var.enable_cloudfront_staging
+
+  staging_distribution_dns_names {
+    items    = [aws_cloudfront_distribution.cloudfront_staging_distribution[count.index].domain_name]
+    quantity = 1
+  }
+
+  traffic_config {
+    type = "SingleWeight"
+    single_weight_config {
+      weight = var.cloudfront_staging_weight
     }
   }
 }
