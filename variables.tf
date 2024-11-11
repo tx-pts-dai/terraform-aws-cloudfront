@@ -34,7 +34,7 @@ variable "enable_cloudfront_staging" {
 }
 
 variable "cloudfront_staging_weight" {
-  description = "The weight of the staging distribution. Default: 0. If set to x, x% of traffic will go to the staging distribution."
+  description = "The weight of the staging distribution. Default: 0. Should be between 0 and 0.15"
   type        = number
   default     = 0
 }
