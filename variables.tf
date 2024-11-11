@@ -28,7 +28,7 @@ variable "enable_cloudfront" {
 }
 
 variable "enable_cloudfront_staging" {
-  description = "Enables the cloudfront staging distribution and continuous deployment. If false: staging distribution isn't active."
+  description = "Enables the cloudfront staging distribution and continuous deployment. If false: staging distribution isn't active. At first deployment, the staging distribution should be set to false. Set this argument once the primary cloudfront exists."
   type        = bool
   default     = false
 }
