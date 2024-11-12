@@ -335,7 +335,7 @@ resource "aws_cloudfront_distribution" "cloudfront_staging_distribution" {
   retain_on_delete    = var.retain_on_delete
   wait_for_deployment = var.wait_for_deployment
   web_acl_id          = var.web_acl_id
-
+  staging             = true
   dynamic "origin" {
     for_each = var.dynamic_s3_origin_config_staging
     content {
