@@ -329,7 +329,7 @@ resource "aws_cloudfront_distribution" "cloudfront_staging_distribution" {
   comment             = "${var.comment}. Associated with resource ID ${random_id.this.hex}"
   default_root_object = var.default_root_object
   enabled             = var.enable_cloudfront_staging
-  http_version        = var.http_version
+  http_version        = "http2"
   is_ipv6_enabled     = "true"
   price_class         = var.cloudfront_price_class
   retain_on_delete    = var.retain_on_delete
