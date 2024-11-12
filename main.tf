@@ -180,6 +180,21 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
       }
     }
   }
+
+  dynamic "origin" {
+    for_each = var.dynamic_s3_origin_config
+    content {
+      domain_name = origin.value.domain_name
+      origin_id   = origin.value.origin_id
+      origin_path = origin.value.origin_path
+      dynamic "s3_origin_config" {
+        for_each = origin.value.origin_access_identity != null ? [1] : []
+        content {
+          origin_access_identity = origin.value.origin_access_identity
+        }
+      }
+    }
+  }
   dynamic "origin" {
     for_each = var.dynamic_custom_origin_config
     content {
@@ -323,6 +338,20 @@ resource "aws_cloudfront_distribution" "cloudfront_staging_distribution" {
   web_acl_id          = var.web_acl_id
 
   dynamic "origin" {
+    for_each = var.dynamic_s3_origin_config_staging
+    content {
+      domain_name = origin.value.domain_name
+      origin_id   = origin.value.origin_id
+      origin_path = origin.value.origin_path
+      dynamic "s3_origin_config" {
+        for_each = origin.value.origin_access_identity != null ? [1] : []
+        content {
+          origin_access_identity = origin.value.origin_access_identity
+        }
+      }
+    }
+  }
+  dynamic "origin" {
     for_each = var.dynamic_s3_origin_config
     content {
       domain_name = origin.value.domain_name
@@ -332,6 +361,29 @@ resource "aws_cloudfront_distribution" "cloudfront_staging_distribution" {
         for_each = origin.value.origin_access_identity != null ? [1] : []
         content {
           origin_access_identity = origin.value.origin_access_identity
+        }
+      }
+    }
+  }
+  dynamic "origin" {
+    for_each = var.dynamic_custom_origin_config_staging
+    content {
+      domain_name = origin.value.domain_name
+      origin_id   = origin.value.origin_id
+      origin_path = origin.value.origin_path
+      custom_origin_config {
+        http_port                = origin.value.http_port
+        https_port               = origin.value.https_port
+        origin_keepalive_timeout = origin.value.origin_keepalive_timeout
+        origin_read_timeout      = origin.value.origin_read_timeout
+        origin_protocol_policy   = origin.value.origin_protocol_policy
+        origin_ssl_protocols     = origin.value.origin_ssl_protocols
+      }
+      dynamic "custom_header" {
+        for_each = origin.value.custom_header
+        content {
+          name  = custom_header.value.name
+          value = custom_header.value.value
         }
       }
     }
@@ -356,6 +408,21 @@ resource "aws_cloudfront_distribution" "cloudfront_staging_distribution" {
           name  = custom_header.value.name
           value = custom_header.value.value
         }
+      }
+    }
+  }
+  dynamic "origin_group" {
+    for_each = var.dynamic_origin_group_staging
+    content {
+      origin_id = origin_group.value.id
+      failover_criteria {
+        status_codes = origin_group.value.status_codes
+      }
+      member {
+        origin_id = origin_group.value.member1
+      }
+      member {
+        origin_id = origin_group.value.member2
       }
     }
   }
