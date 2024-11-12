@@ -86,7 +86,38 @@ variable "dynamic_s3_origin_config" {
   default = []
 }
 
+variable "dynamic_s3_origin_config_staging" {
+  description = "Configuration of the S3 bucket used as origin, if any"
+  type = list(object({
+    domain_name            = string
+    origin_id              = string
+    origin_path            = string
+    origin_access_identity = optional(string)
+  }))
+  default = []
+}
+
 variable "dynamic_custom_origin_config" {
+  description = "Configuration of the custom origin (e.g: HTTP server)"
+  type = list(object({
+    domain_name              = string
+    origin_id                = string
+    origin_path              = string
+    http_port                = optional(number, 80)
+    https_port               = optional(number, 443)
+    origin_keepalive_timeout = optional(number, 60)
+    origin_read_timeout      = optional(number, 60)
+    origin_protocol_policy   = optional(string, "https-only")
+    origin_ssl_protocols     = list(string)
+    custom_header = optional(list(object({
+      name  = string
+      value = string
+    })), [])
+  }))
+  default = []
+}
+
+variable "dynamic_custom_origin_config_staging" {
   description = "Configuration of the custom origin (e.g: HTTP server)"
   type = list(object({
     domain_name              = string
@@ -214,6 +245,17 @@ variable "default_cache_behavior" {
 }
 
 variable "dynamic_origin_group" {
+  description = "One or more origin_group for this distribution (multiples allowed)."
+  type = list(object({
+    id           = string
+    status_codes = list(number)
+    member1      = string
+    member2      = string
+  }))
+  default = []
+}
+
+variable "dynamic_origin_group_staging" {
   description = "One or more origin_group for this distribution (multiples allowed)."
   type = list(object({
     id           = string
