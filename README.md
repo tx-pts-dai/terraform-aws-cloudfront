@@ -42,7 +42,7 @@ module "cdn" {
 ## Core concepts
 
 ### Continuous deployment using staging distribution
-a staging distribution is a separate CloudFront distribution used to test changes before they are deployed to production. This allows you to validate and ensure that the changes work as expected without affecting the live environment.
+A staging distribution is a separate CloudFront distribution used to test changes before they are deployed to production. This allows you to validate and ensure that the changes work as expected without affecting the live environment.
 
 To use the staging distribution, you need to configure the `enable_cloudfront_staging` and `cloudfront_staging_weight` variables. The staging distribution allows you to test changes before deploying them to production. You can also configure specific origin for the staging distribution.
 
