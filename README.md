@@ -46,6 +46,8 @@ A staging distribution is a separate CloudFront distribution used to test change
 
 To use the staging distribution, you need to configure the `enable_cloudfront_staging` and `cloudfront_staging_weight` variables. The staging distribution allows you to test changes before deploying them to production. You can also configure specific origin for the staging distribution.
 
+Also, as soon as you want to use the staging distribution feature, `http2` is required as the `http_version`.
+
 Here is an example of how to configure the staging distribution:
 
 ```tf
@@ -55,6 +57,7 @@ module "cdn" {
   enable_cloudfront          = true
   enable_cloudfront_staging  = true
   cloudfront_staging_weight  = 0.10 # 10% of trafic will go to the staging distribution
+  http_version               = "http2"
 
   ...
 
