@@ -308,7 +308,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
 
 resource "aws_cloudfront_distribution" "cloudfront_staging_distribution" {
   count               = var.enable_cloudfront_staging ? 1 : 0
-  comment             = "${var.comment}. Associated with resource ID ${random_id.this.hex}"
+  comment             = "${var.comment}. Staging associated with resource ID ${random_id.this.hex}"
   default_root_object = var.default_root_object
   enabled             = var.enable_cloudfront_staging
   http_version        = "http2"
