@@ -149,7 +149,6 @@ resource "aws_cloudfront_origin_request_policy" "ordered_behaviors" {
   }
 }
 
-
 resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   aliases             = var.aliases
   comment             = "${var.comment}. Associated with resource ID ${random_id.this.hex}"
