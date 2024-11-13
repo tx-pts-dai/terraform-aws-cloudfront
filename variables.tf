@@ -87,7 +87,7 @@ variable "dynamic_s3_origin_config" {
 }
 
 variable "dynamic_s3_origin_config_staging" {
-  description = "Configuration of the S3 bucket used as origin, if any"
+  description = "Configuration of the S3 bucket used as origin for staging, if any"
   type = list(object({
     domain_name            = string
     origin_id              = string
@@ -118,7 +118,7 @@ variable "dynamic_custom_origin_config" {
 }
 
 variable "dynamic_custom_origin_config_staging" {
-  description = "Configuration of the custom origin (e.g: HTTP server)"
+  description = "Configuration of the custom origin for staging (e.g: HTTP server)"
   type = list(object({
     domain_name              = string
     origin_id                = string
@@ -256,7 +256,7 @@ variable "dynamic_origin_group" {
 }
 
 variable "dynamic_origin_group_staging" {
-  description = "One or more origin_group for this distribution (multiples allowed)."
+  description = "One or more origin_group for staging distribution (multiples allowed)."
   type = list(object({
     id           = string
     status_codes = list(number)
