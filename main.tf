@@ -178,21 +178,6 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
       }
     }
   }
-
-  dynamic "origin" {
-    for_each = var.dynamic_s3_origin_config
-    content {
-      domain_name = origin.value.domain_name
-      origin_id   = origin.value.origin_id
-      origin_path = origin.value.origin_path
-      dynamic "s3_origin_config" {
-        for_each = origin.value.origin_access_identity != null ? [1] : []
-        content {
-          origin_access_identity = origin.value.origin_access_identity
-        }
-      }
-    }
-  }
   dynamic "origin" {
     for_each = var.dynamic_custom_origin_config
     content {
