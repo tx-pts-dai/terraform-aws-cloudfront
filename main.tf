@@ -162,8 +162,6 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   wait_for_deployment = var.wait_for_deployment
   web_acl_id          = var.web_acl_id
 
-  # NOTE: A continuous deployment policy cannot be associated to distribution
-  # on creation. Set this argument once the resource exists.
   continuous_deployment_policy_id = var.enable_cloudfront_staging ? aws_cloudfront_continuous_deployment_policy.cloudfront_staging[0].id : null
 
   dynamic "origin" {
