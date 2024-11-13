@@ -2,7 +2,7 @@
 
 This module provides a CloudFront distribution, with SSL certificates from Custom Domains. It features built-in Athena queries, Kinesis stream for real-time logging and ACM certificate validation on AWS Route53 or Cloudflare.
 
-## Usage
+## Basic usage
 
 ```tf
 module "cdn" {
@@ -40,6 +40,46 @@ module "cdn" {
 ```
 
 ## Core concepts
+
+### Continuous deployment using staging distribution
+a staging distribution is a separate CloudFront distribution used to test changes before they are deployed to production. This allows you to validate and ensure that the changes work as expected without affecting the live environment.
+
+To use the staging distribution, you need to configure the `enable_cloudfront_staging` and `cloudfront_staging_weight` variables. The staging distribution allows you to test changes before deploying them to production. You can also configure specific origin for the staging distribution.
+
+Here is an example of how to configure the staging distribution:
+
+```tf
+module "cdn" {
+  source                     = "tx-pts-dai/cloudfront/aws"
+  version                    = "2.0.0"
+  enable_cloudfront          = true
+  enable_cloudfront_staging  = true
+  cloudfront_staging_weight  = 0.10 # 10% of trafic will go to the staging distribution
+
+  ...
+
+  dynamic_custom_origin_config = [
+    {
+      domain_name              = module.traefik_ingress.dns_name_ingress
+      origin_id                = "custom-origin-1"
+      origin_path              = "/route-to-custom-origin-1"
+      origin_ssl_protocols     = ["TLSv1.2"]
+    }
+  ]
+  dynamic_custom_origin_config_staging = [
+    {
+      domain_name              = module.traefik_ingress.dns_name_ingress
+      origin_id                = "custom-origin-staging"
+      origin_path              = "/route-to-custom-origin-staging"
+      origin_ssl_protocols     = ["TLSv1.2"]
+    }
+  ]
+
+  providers = {
+    aws = aws.us
+  }
+}
+```
 
 ### Realtime Log flow
 
