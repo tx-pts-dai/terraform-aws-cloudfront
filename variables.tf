@@ -154,6 +154,51 @@ variable "viewer_cert_minimum_protocol_version" {
   default     = "TLSv1.2_2021"
 }
 
+variable "dynamic_ordered_cache_behavior_staging" {
+  description = "An ordered list of cache behaviors resource for this distribution. List from top to bottom in order of precedence. The topmost cache behavior will have precedence 0."
+  type = list(object({
+    path_pattern     = string
+    allowed_methods  = list(string)
+    cached_methods   = list(string)
+    target_origin_id = string
+    compress         = optional(bool, true)
+    cache_policy = optional(object({
+      min_ttl               = optional(number, 0)
+      default_ttl           = optional(number, 0)
+      max_ttl               = optional(number, 31536000) # 1 year
+      header_behavior       = optional(string, "whitelist")
+      headers               = optional(list(string), ["Host", "Origin"])
+      cookie_behavior       = optional(string, "none")
+      cookies               = optional(list(string), [])
+      query_string_behavior = optional(string, "all")
+      query_strings         = optional(list(string), [])
+      enable_brotli         = optional(bool, true)
+      enable_gzip           = optional(bool, true)
+    }), {})
+    # use this if you want to include additional headers/cookies/query_strings to be forwarded to the origin
+    origin_request_policy = optional(object({
+      header_behavior       = optional(string, "none")
+      headers               = optional(list(string), [])
+      cookie_behavior       = optional(string, "none")
+      cookies               = optional(list(string), [])
+      query_string_behavior = optional(string, "none")
+      query_strings         = optional(list(string), [])
+    }))
+    viewer_protocol_policy  = optional(string, "redirect-to-https")
+    realtime_log_config_arn = optional(string)
+    function_association = optional(list(object({
+      event_type   = string
+      function_arn = string
+    })), [])
+    lambda_at_edge = optional(list(object({
+      lambda_arn   = string
+      event_type   = string
+      include_body = bool
+    })), [])
+  }))
+  default = []
+}
+
 variable "dynamic_ordered_cache_behavior" {
   description = "An ordered list of cache behaviors resource for this distribution. List from top to bottom in order of precedence. The topmost cache behavior will have precedence 0."
   type = list(object({
@@ -197,6 +242,51 @@ variable "dynamic_ordered_cache_behavior" {
     })), [])
   }))
   default = []
+}
+
+variable "default_cache_behavior_staging" {
+  description = "Default cache behavior resource for this distribution."
+  type = object({
+    path_pattern     = string
+    allowed_methods  = list(string)
+    cached_methods   = list(string)
+    target_origin_id = string
+    compress         = optional(bool, true)
+    cache_policy = optional(object({
+      min_ttl               = optional(number, 0)
+      default_ttl           = optional(number, 0)
+      max_ttl               = optional(number, 31536000) # 1 year
+      header_behavior       = optional(string, "whitelist")
+      headers               = optional(list(string), ["Host", "Origin"])
+      cookie_behavior       = optional(string, "none")
+      cookies               = optional(list(string), [])
+      query_string_behavior = optional(string, "all")
+      query_strings         = optional(list(string), [])
+      enable_brotli         = optional(bool, true)
+      enable_gzip           = optional(bool, true)
+    }), {})
+    # use this if you want to include additional headers/cookies/query_strings to be forwarded to the origin
+    origin_request_policy = optional(object({
+      header_behavior       = optional(string, "none")
+      headers               = optional(list(string), [])
+      cookie_behavior       = optional(string, "none")
+      cookies               = optional(list(string), [])
+      query_string_behavior = optional(string, "none")
+      query_strings         = optional(list(string), [])
+    }))
+    viewer_protocol_policy  = optional(string, "redirect-to-https")
+    realtime_log_config_arn = optional(string)
+    function_association = optional(list(object({
+      event_type   = string
+      function_arn = string
+    })), [])
+    lambda_at_edge = optional(list(object({
+      lambda_arn   = string
+      event_type   = string
+      include_body = bool
+    })), [])
+  })
+  default = null
 }
 
 variable "default_cache_behavior" {

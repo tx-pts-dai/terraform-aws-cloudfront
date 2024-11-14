@@ -371,18 +371,18 @@ resource "aws_cloudfront_distribution" "cloudfront_staging_distribution" {
     }
   }
   default_cache_behavior {
-    allowed_methods         = var.default_cache_behavior.allowed_methods
-    cached_methods          = var.default_cache_behavior.cached_methods
-    target_origin_id        = var.default_cache_behavior.target_origin_id
-    compress                = var.default_cache_behavior.compress
-    viewer_protocol_policy  = var.default_cache_behavior.viewer_protocol_policy
-    realtime_log_config_arn = var.default_cache_behavior.realtime_log_config_arn
+    allowed_methods         = var.default_cache_behavior_staging.allowed_methods
+    cached_methods          = var.default_cache_behavior_staging.cached_methods
+    target_origin_id        = var.default_cache_behavior_staging.target_origin_id
+    compress                = var.default_cache_behavior_staging.compress
+    viewer_protocol_policy  = var.default_cache_behavior_staging.viewer_protocol_policy
+    realtime_log_config_arn = var.default_cache_behavior_staging.realtime_log_config_arn
 
     cache_policy_id          = aws_cloudfront_cache_policy.ordered_behaviors["default"].id
     origin_request_policy_id = try(aws_cloudfront_origin_request_policy.ordered_behaviors["default"].id, null)
 
     dynamic "function_association" {
-      for_each = var.default_cache_behavior.function_association
+      for_each = var.default_cache_behavior_staging.function_association
       content {
         function_arn = function_association.value.function_arn
         event_type   = function_association.value.event_type
@@ -390,7 +390,7 @@ resource "aws_cloudfront_distribution" "cloudfront_staging_distribution" {
     }
 
     dynamic "lambda_function_association" {
-      for_each = var.default_cache_behavior.lambda_at_edge
+      for_each = var.default_cache_behavior_staging.lambda_at_edge
       content {
         lambda_arn   = lambda_function_association.value.lambda_arn
         event_type   = lambda_function_association.value.event_type
@@ -400,7 +400,7 @@ resource "aws_cloudfront_distribution" "cloudfront_staging_distribution" {
   }
 
   dynamic "ordered_cache_behavior" {
-    for_each = var.dynamic_ordered_cache_behavior
+    for_each = var.dynamic_ordered_cache_behavior_staging
     content {
       path_pattern            = ordered_cache_behavior.value.path_pattern
       allowed_methods         = ordered_cache_behavior.value.allowed_methods
