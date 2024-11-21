@@ -27,6 +27,18 @@ variable "enable_cloudfront" {
   default     = true
 }
 
+variable "enable_cloudfront_staging" {
+  description = "Enables the cloudfront staging distribution and continuous deployment. If false: staging distribution isn't active. At first deployment, the staging distribution should be set to false. Set this argument once the primary cloudfront exists."
+  type        = bool
+  default     = false
+}
+
+variable "cloudfront_staging_weight" {
+  description = "The weight of the staging distribution. Default: 0. Should be between 0 and 0.15"
+  type        = number
+  default     = 0
+}
+
 variable "cloudfront_price_class" {
   description = "Price class of the cloudfront distribution."
   type        = string
@@ -74,8 +86,39 @@ variable "dynamic_s3_origin_config" {
   default = []
 }
 
+variable "dynamic_s3_origin_config_staging" {
+  description = "Configuration of the S3 bucket used as origin for staging, if any"
+  type = list(object({
+    domain_name            = string
+    origin_id              = string
+    origin_path            = string
+    origin_access_identity = optional(string)
+  }))
+  default = []
+}
+
 variable "dynamic_custom_origin_config" {
   description = "Configuration of the custom origin (e.g: HTTP server)"
+  type = list(object({
+    domain_name              = string
+    origin_id                = string
+    origin_path              = string
+    http_port                = optional(number, 80)
+    https_port               = optional(number, 443)
+    origin_keepalive_timeout = optional(number, 60)
+    origin_read_timeout      = optional(number, 60)
+    origin_protocol_policy   = optional(string, "https-only")
+    origin_ssl_protocols     = list(string)
+    custom_header = optional(list(object({
+      name  = string
+      value = string
+    })), [])
+  }))
+  default = []
+}
+
+variable "dynamic_custom_origin_config_staging" {
+  description = "Configuration of the custom origin for staging (e.g: HTTP server)"
   type = list(object({
     domain_name              = string
     origin_id                = string
@@ -109,6 +152,51 @@ variable "viewer_cert_minimum_protocol_version" {
   description = "Minimum SSL/TLS protocol for https certificates used by the viewer"
   type        = string
   default     = "TLSv1.2_2021"
+}
+
+variable "dynamic_ordered_cache_behavior_staging" {
+  description = "An ordered list of cache behaviors resource for this distribution. List from top to bottom in order of precedence. The topmost cache behavior will have precedence 0."
+  type = list(object({
+    path_pattern     = string
+    allowed_methods  = list(string)
+    cached_methods   = list(string)
+    target_origin_id = string
+    compress         = optional(bool, true)
+    cache_policy = optional(object({
+      min_ttl               = optional(number, 0)
+      default_ttl           = optional(number, 0)
+      max_ttl               = optional(number, 31536000) # 1 year
+      header_behavior       = optional(string, "whitelist")
+      headers               = optional(list(string), ["Host", "Origin"])
+      cookie_behavior       = optional(string, "none")
+      cookies               = optional(list(string), [])
+      query_string_behavior = optional(string, "all")
+      query_strings         = optional(list(string), [])
+      enable_brotli         = optional(bool, true)
+      enable_gzip           = optional(bool, true)
+    }), {})
+    # use this if you want to include additional headers/cookies/query_strings to be forwarded to the origin
+    origin_request_policy = optional(object({
+      header_behavior       = optional(string, "none")
+      headers               = optional(list(string), [])
+      cookie_behavior       = optional(string, "none")
+      cookies               = optional(list(string), [])
+      query_string_behavior = optional(string, "none")
+      query_strings         = optional(list(string), [])
+    }))
+    viewer_protocol_policy  = optional(string, "redirect-to-https")
+    realtime_log_config_arn = optional(string)
+    function_association = optional(list(object({
+      event_type   = string
+      function_arn = string
+    })), [])
+    lambda_at_edge = optional(list(object({
+      lambda_arn   = string
+      event_type   = string
+      include_body = bool
+    })), [])
+  }))
+  default = []
 }
 
 variable "dynamic_ordered_cache_behavior" {
@@ -154,6 +242,51 @@ variable "dynamic_ordered_cache_behavior" {
     })), [])
   }))
   default = []
+}
+
+variable "default_cache_behavior_staging" {
+  description = "Default cache behavior resource for this distribution."
+  type = object({
+    path_pattern     = string
+    allowed_methods  = list(string)
+    cached_methods   = list(string)
+    target_origin_id = string
+    compress         = optional(bool, true)
+    cache_policy = optional(object({
+      min_ttl               = optional(number, 0)
+      default_ttl           = optional(number, 0)
+      max_ttl               = optional(number, 31536000) # 1 year
+      header_behavior       = optional(string, "whitelist")
+      headers               = optional(list(string), ["Host", "Origin"])
+      cookie_behavior       = optional(string, "none")
+      cookies               = optional(list(string), [])
+      query_string_behavior = optional(string, "all")
+      query_strings         = optional(list(string), [])
+      enable_brotli         = optional(bool, true)
+      enable_gzip           = optional(bool, true)
+    }), {})
+    # use this if you want to include additional headers/cookies/query_strings to be forwarded to the origin
+    origin_request_policy = optional(object({
+      header_behavior       = optional(string, "none")
+      headers               = optional(list(string), [])
+      cookie_behavior       = optional(string, "none")
+      cookies               = optional(list(string), [])
+      query_string_behavior = optional(string, "none")
+      query_strings         = optional(list(string), [])
+    }))
+    viewer_protocol_policy  = optional(string, "redirect-to-https")
+    realtime_log_config_arn = optional(string)
+    function_association = optional(list(object({
+      event_type   = string
+      function_arn = string
+    })), [])
+    lambda_at_edge = optional(list(object({
+      lambda_arn   = string
+      event_type   = string
+      include_body = bool
+    })), [])
+  })
+  default = null
 }
 
 variable "default_cache_behavior" {
@@ -203,6 +336,17 @@ variable "default_cache_behavior" {
 
 variable "dynamic_origin_group" {
   description = "One or more origin_group for this distribution (multiples allowed)."
+  type = list(object({
+    id           = string
+    status_codes = list(number)
+    member1      = string
+    member2      = string
+  }))
+  default = []
+}
+
+variable "dynamic_origin_group_staging" {
+  description = "One or more origin_group for staging distribution (multiples allowed)."
   type = list(object({
     id           = string
     status_codes = list(number)
