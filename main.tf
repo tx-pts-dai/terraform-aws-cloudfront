@@ -112,6 +112,47 @@ resource "aws_cloudfront_cache_policy" "ordered_behaviors" {
   }
 }
 
+resource "aws_cloudfront_cache_policy" "ordered_behaviors_staging" {
+  count       = var.enable_cloudfront_staging ? 1 : 0
+  for_each    = local.cache_policy_map
+  name        = "${replace(var.aliases[0], "/[*.]/", "_")}-${each.key}"
+  min_ttl     = each.value.cache_policy.min_ttl
+  default_ttl = each.value.cache_policy.default_ttl
+  max_ttl     = each.value.cache_policy.max_ttl
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_gzip   = each.value.cache_policy.enable_gzip
+    enable_accept_encoding_brotli = each.value.cache_policy.enable_brotli
+    cookies_config {
+      cookie_behavior = each.value.cache_policy.cookie_behavior
+      dynamic "cookies" {
+        for_each = length(each.value.cache_policy.cookies) > 0 ? [1] : []
+        content {
+          items = each.value.cache_policy.cookies
+        }
+      }
+    }
+    headers_config {
+      header_behavior = each.value.cache_policy.header_behavior
+      dynamic "headers" {
+        for_each = length(each.value.cache_policy.headers) > 0 ? [1] : []
+        content {
+          items = each.value.cache_policy.headers
+        }
+      }
+    }
+    query_strings_config {
+      query_string_behavior = each.value.cache_policy.query_string_behavior
+      dynamic "query_strings" {
+        for_each = length(each.value.cache_policy.query_strings) > 0 ? [1] : []
+        content {
+          items = each.value.cache_policy.query_strings
+        }
+      }
+    }
+  }
+}
+
 # Values in the cache policy are automatically included in origin requests,
 # so you don’t need to specify those values again in the origin request policy.
 resource "aws_cloudfront_origin_request_policy" "ordered_behaviors" {
@@ -148,6 +189,43 @@ resource "aws_cloudfront_origin_request_policy" "ordered_behaviors" {
     }
   }
 }
+
+resource "aws_cloudfront_origin_request_policy" "ordered_behaviors_staging" {
+  count    = var.
+  for_each = local.origin_request_policies_map
+  name     = "${replace(var.aliases[0], "/[*.]/", "_")}-${each.key}"
+
+  cookies_config {
+    cookie_behavior = each.value.origin_request_policy.cookie_behavior
+    dynamic "cookies" {
+      for_each = length(each.value.origin_request_policy.cookies) > 0 ? [1] : []
+      content {
+        items = each.value.origin_request_policy.cookies
+      }
+    }
+  }
+
+  headers_config {
+    header_behavior = each.value.origin_request_policy.header_behavior
+    dynamic "headers" {
+      for_each = length(each.value.origin_request_policy.headers) > 0 ? [1] : []
+      content {
+        items = each.value.origin_request_policy.headers
+      }
+    }
+  }
+
+  query_strings_config {
+    query_string_behavior = each.value.origin_request_policy.query_string_behavior
+    dynamic "query_strings" {
+      for_each = length(each.value.origin_request_policy.query_strings) > 0 ? [1] : []
+      content {
+        items = each.value.origin_request_policy.query_strings
+      }
+    }
+  }
+}
+
 
 resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   aliases             = var.aliases
@@ -378,8 +456,8 @@ resource "aws_cloudfront_distribution" "cloudfront_staging_distribution" {
     viewer_protocol_policy  = var.default_cache_behavior_staging.viewer_protocol_policy
     realtime_log_config_arn = var.default_cache_behavior_staging.realtime_log_config_arn
 
-    cache_policy_id          = aws_cloudfront_cache_policy.ordered_behaviors["default"].id
-    origin_request_policy_id = try(aws_cloudfront_origin_request_policy.ordered_behaviors["default"].id, null)
+    cache_policy_id          = aws_cloudfront_cache_policy.ordered_behaviors_staging["default"].id
+    origin_request_policy_id = try(aws_cloudfront_origin_request_policy.ordered_behaviors_staging["default"].id, null)
 
     dynamic "function_association" {
       for_each = var.default_cache_behavior_staging.function_association
@@ -410,8 +488,8 @@ resource "aws_cloudfront_distribution" "cloudfront_staging_distribution" {
       viewer_protocol_policy  = ordered_cache_behavior.value.viewer_protocol_policy
       realtime_log_config_arn = ordered_cache_behavior.value.realtime_log_config_arn
 
-      cache_policy_id          = aws_cloudfront_cache_policy.ordered_behaviors[substr(sha256(ordered_cache_behavior.value.path_pattern), 0, 8)].id
-      origin_request_policy_id = try(aws_cloudfront_origin_request_policy.ordered_behaviors[substr(sha256(ordered_cache_behavior.value.path_pattern), 0, 8)].id, null)
+      cache_policy_id          = aws_cloudfront_cache_policy.ordered_behaviors_staging[substr(sha256(ordered_cache_behavior.value.path_pattern), 0, 8)].id
+      origin_request_policy_id = try(aws_cloudfront_origin_request_policy.ordered_behaviors_staging[substr(sha256(ordered_cache_behavior.value.path_pattern), 0, 8)].id, null)
 
       dynamic "function_association" {
         for_each = ordered_cache_behavior.value.function_association
