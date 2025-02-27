@@ -79,11 +79,12 @@ locals {
   origin_request_policies_map_staging = { for k, v in local.cache_policy_map_staging :
     k => v if v.origin_request_policy != null
   }
+  transformed_alias = replace(var.aliases[0], "/[*.]/", "_")
 }
 
 resource "aws_cloudfront_cache_policy" "ordered_behaviors" {
   for_each    = local.cache_policy_map
-  name        = "${replace(var.aliases[0], "/[*.]/", "_")}-${each.key}"
+  name        = "${local.transformed_alias}-${each.key}"
   min_ttl     = each.value.cache_policy.min_ttl
   default_ttl = each.value.cache_policy.default_ttl
   max_ttl     = each.value.cache_policy.max_ttl
@@ -125,7 +126,7 @@ resource "aws_cloudfront_cache_policy" "ordered_behaviors" {
 # so you don’t need to specify those values again in the origin request policy.
 resource "aws_cloudfront_origin_request_policy" "ordered_behaviors" {
   for_each = local.origin_request_policies_map
-  name     = "${replace(var.aliases[0], "/[*.]/", "_")}-${each.key}"
+  name     = "${local.transformed_alias}-${each.key}"
 
   cookies_config {
     cookie_behavior = each.value.origin_request_policy.cookie_behavior
@@ -489,7 +490,7 @@ resource "aws_cloudfront_continuous_deployment_policy" "cloudfront_staging" {
 
 resource "aws_cloudfront_cache_policy" "ordered_behaviors_staging" {
   for_each    = local.cache_policy_map_staging
-  name        = "${replace(var.aliases[0], "/[*.]/", "_")}-${each.key}"
+  name        = "${local.transformed_alias}-${each.key}"
   min_ttl     = each.value.cache_policy.min_ttl
   default_ttl = each.value.cache_policy.default_ttl
   max_ttl     = each.value.cache_policy.max_ttl
@@ -531,7 +532,7 @@ resource "aws_cloudfront_cache_policy" "ordered_behaviors_staging" {
 # so you don’t need to specify those values again in the origin request policy.
 resource "aws_cloudfront_origin_request_policy" "ordered_behaviors_staging" {
   for_each = local.origin_request_policies_map_staging
-  name     = "${replace(var.aliases[0], "/[*.]/", "_")}-${each.key}"
+  name     = "${local.transformed_alias}-${each.key}"
 
   cookies_config {
     cookie_behavior = each.value.origin_request_policy.cookie_behavior
