@@ -7,7 +7,7 @@ name: verify-pre-commit
 #   - Terraform validate with tflint
 #   - check for merge conflicts
 #   - fix end of files
-# 
+#
 # The preCommitMinVersions job will check that terraform validates with the minimum
 # allowed version of the module.
 # The preCommitMaxVersion job will check that terraform validates with the maximum
@@ -24,8 +24,8 @@ on:
       - 'renovate.json'
 
 env:
-  TERRAFORM_DOCS_VERSION: v0.16.0
-  TFLINT_VERSION: v0.44.1
+  TERRAFORM_DOCS_VERSION: v0.19.0 # github-releases/terraform-docs/terraform-docs
+  TFLINT_VERSION: v0.44.1 # github-releases/terraform-linters/tflint
 
 jobs:
   collectInputs:

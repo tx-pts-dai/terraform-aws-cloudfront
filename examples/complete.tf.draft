@@ -1,0 +1,32 @@
+module "cdn" {
+  source            = "tx-pts-dai/cloudfront/aws"
+  version           = "2.0.0"
+  enable_cloudfront = true
+  aliases           = ["www.example.com", "beta.example.com", "*.beta.example.com"]
+  http_version      = "http2"
+  dynamic_custom_origin_config = [
+    {
+      domain_name          = module.traefik_ingress.dns_name_ingress
+      origin_id            = "custom-origin-1"
+      origin_path          = "/route-to-custom-origin-1"
+      origin_ssl_protocols = ["TLSv1.2"]
+    }
+  ]
+  dns_zone_id = aws_route53_zone.zone.zone_id
+  default_cache_behavior = {
+    path_pattern     = "*"
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods   = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id = "default"
+    cache_policy = {
+      headers         = ["Authorization", "Host"]
+      cookie_behavior = "whitelist"
+      cookies         = ["my-custom-cookie"]
+    }
+  }
+  dynamic_ordered_cache_behavior = var.cloudfront_ordered_cache_behaviour # Same as the default one, but ordered
+
+  providers = {
+    aws = aws.us # AWS provider should be in region "us-east-1"
+  }
+}
