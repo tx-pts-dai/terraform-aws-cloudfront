@@ -18,6 +18,10 @@ output "certificate_arn" {
   description = "The ARN of the issued ACM certificate."
   value       = aws_acm_certificate.cert.arn
 }
+output "certificate_domain_validation_options" {
+  description = "The validation options of the issued ACM certificate."
+  value           = aws_acm_certificate.cert.cert.domain_validation_options
+}
 
 output "certificate_domain" {
   description = "The primary domain name of the certificate."
