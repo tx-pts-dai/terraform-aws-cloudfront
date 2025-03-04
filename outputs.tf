@@ -20,7 +20,7 @@ output "certificate_arn" {
 }
 output "certificate_domain_validation_options" {
   description = "The validation options of the issued ACM certificate."
-  value           = aws_acm_certificate.cert.cert.domain_validation_options
+  value       = aws_acm_certificate.cert.domain_validation_options
 }
 
 output "certificate_domain" {
