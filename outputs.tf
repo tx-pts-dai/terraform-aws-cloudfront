@@ -13,3 +13,22 @@ output "realtime_log_config_arn" {
   description = "ARN of the realtime logging configuration"
 
 }
+
+output "certificate_arn" {
+  description = "The ARN of the issued ACM certificate."
+  value       = aws_acm_certificate.cert.arn
+}
+output "certificate_domain_validation_options" {
+  description = "The validation options of the issued ACM certificate."
+  value       = aws_acm_certificate.cert.domain_validation_options
+}
+
+output "certificate_domain" {
+  description = "The primary domain name of the certificate."
+  value       = aws_acm_certificate.cert.domain_name
+}
+
+output "certificate_validation_arn" {
+  description = "The ARN of the ACM certificate validation resource."
+  value       = aws_acm_certificate_validation.cert.id
+}

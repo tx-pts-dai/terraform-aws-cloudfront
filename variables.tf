@@ -286,7 +286,12 @@ variable "default_cache_behavior_staging" {
       include_body = bool
     })), [])
   })
-  default = null
+  default = {
+    path_pattern     = "*"
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id = ""
+  }
 }
 
 variable "default_cache_behavior" {
@@ -331,7 +336,12 @@ variable "default_cache_behavior" {
       include_body = bool
     })), [])
   })
-  default = null
+  default = {
+    path_pattern     = "*"
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id = ""
+  }
 }
 
 variable "dynamic_origin_group" {
