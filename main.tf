@@ -73,9 +73,9 @@ locals {
   ordered_behaviours_map_staging = { for behaviour in var.dynamic_ordered_cache_behavior_staging :
     substr(sha256(behaviour.path_pattern), 0, 8) => behaviour
   }
-  cache_policy_map_staging = merge(
+  cache_policy_map_staging = var.enable_cloudfront_staging ? merge(
     { "default" = var.default_cache_behavior_staging }, local.ordered_behaviours_map_staging
-  )
+  ) : {}
   origin_request_policies_map_staging = { for k, v in local.cache_policy_map_staging :
     k => v if v.origin_request_policy != null
   }
@@ -490,7 +490,7 @@ resource "aws_cloudfront_continuous_deployment_policy" "cloudfront_staging" {
 
 resource "aws_cloudfront_cache_policy" "ordered_behaviors_staging" {
   for_each    = local.cache_policy_map_staging
-  name        = "${local.transformed_alias}-${each.key}"
+  name        = "${local.transformed_alias}-${each.key}-staging"
   min_ttl     = each.value.cache_policy.min_ttl
   default_ttl = each.value.cache_policy.default_ttl
   max_ttl     = each.value.cache_policy.max_ttl
