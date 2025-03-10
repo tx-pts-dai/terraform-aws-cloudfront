@@ -32,3 +32,8 @@ output "certificate_validation_arn" {
   description = "The ARN of the ACM certificate validation resource."
   value       = aws_acm_certificate_validation.cert.id
 }
+
+output "certificate_validation_records" {
+  description = "List of FQDNs that implement the validation."
+  value       = aws_acm_certificate_validation.cert.validation_record_fqdns
+}
