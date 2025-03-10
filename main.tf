@@ -532,7 +532,7 @@ resource "aws_cloudfront_cache_policy" "ordered_behaviors_staging" {
 # so you don’t need to specify those values again in the origin request policy.
 resource "aws_cloudfront_origin_request_policy" "ordered_behaviors_staging" {
   for_each = local.origin_request_policies_map_staging
-  name     = "${local.transformed_alias}-${each.key}"
+  name     = "${local.transformed_alias}-${each.key}-staging"
 
   cookies_config {
     cookie_behavior = each.value.origin_request_policy.cookie_behavior
