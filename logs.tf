@@ -81,6 +81,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
     expiration {
       days = var.logging.retention_days
     }
+    filter {
+      prefix = ""
+    }
     status = "Enabled"
   }
 }
