@@ -32,3 +32,8 @@ output "certificate_validation_arn" {
   description = "The ARN of the ACM certificate validation resource."
   value       = aws_acm_certificate_validation.cert.id
 }
+
+output "distribution_arn" {
+  description = "The ARN of the CloudFront distribution."
+  value       = aws_cloudfront_distribution.cloudfront_distribution.arn
+}
